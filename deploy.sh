@@ -2,7 +2,9 @@
 
 set -ueo pipefail
 
-docker-machine create -d virtualbox swarm-keystore
+docker-machine create \
+  -d virtualbox \
+  swarm-keystore
 eval $(docker-machine env swarm-keystore)
 
 docker run -d \
@@ -18,14 +20,16 @@ docker-machine create \
   --engine-opt="cluster-advertise=eth1:2376" \
   swarm-master
 
-docker-machine create -d virtualbox \
+docker-machine create \
+  -d virtualbox \
   --swarm \
   --swarm-discovery="consul://$(docker-machine ip swarm-keystore):8500" \
   --engine-opt="cluster-store=consul://$(docker-machine ip swarm-keystore):8500" \
   --engine-opt="cluster-advertise=eth1:2376" \
   swarm-agent-n1
 
-docker-machine create -d virtualbox \
+docker-machine create \
+  -d virtualbox \
   --swarm \
   --swarm-discovery="consul://$(docker-machine ip swarm-keystore):8500" \
   --engine-opt="cluster-store=consul://$(docker-machine ip swarm-keystore):8500" \
