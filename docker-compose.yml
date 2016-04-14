@@ -1,0 +1,61 @@
+version: '2'
+
+# we use a named volume
+volumes:
+  testingvolume:
+
+services:
+
+  api:
+    image: tutum/hello-world
+    restart: unless-stopped
+    ports:
+      - '8888:80'
+
+  # nginx service to serve static client files
+  nginx:
+    image: tutum/hello-world
+    restart: always
+    ports:
+      - '7777:80'
+
+  #interlock
+  interlock:
+    image: ehazlett/interlock:1.1.0
+    environment: 
+        INTERLOCK_CONFIG: |
+            ListenAddr = ":8080"
+            DockerURL = "${SWARM_HOST}"
+            TLSCACert = ""
+            TLSCert = ""
+            TLSKey = ""
+            InsecureSkipVerify = true
+            AllowInsecure = true
+            
+            [[Extensions]]
+              Name = "haproxy"
+              ConfigPath = "/usr/local/etc/haproxy/haproxy.cfg"
+              PidPath = "/run/haproxy.pid"
+              MaxConn = 1024
+              Port = 80
+              AdminUser = "admin"
+              AdminPass = "interlock"
+    command: -D run
+    ports:
+        - '8080:8080'
+    volumes:
+      - testingvolume:/usr/local/etc/haproxy
+
+  #loadbalancer
+  haproxy:
+    image: haproxy:latest
+    ports:
+        - '80:80'
+        #- '443:443'
+    labels:
+        - "interlock.ext.name=haproxy"
+    depends_on: 
+      - interlock
+    volumes:
+      - testingvolume:/usr/local/etc/haproxy
+    restart: always
