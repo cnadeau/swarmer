@@ -25,6 +25,9 @@ eval $(docker-machine env swarm-master)
 docker stop swarm-agent
 docker rm swarm-agent
 
+# Use a socat proxy to expose non-TLS port 2375
+docker run -d -p 2375:2375 --volume=/var/run/docker.sock:/var/run/docker.sock --name=docker-http sequenceiq/socat
+
 eval $(docker-machine env swarm-keystore)
 
 docker-machine create \
