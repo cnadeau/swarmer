@@ -20,6 +20,13 @@ docker-machine create \
   --engine-opt="cluster-advertise=eth1:2376" \
   swarm-master
 
+# Stop and remove swarm-agent to remove the master from the swarm nodes (https://github.com/docker/machine/issues/2302)
+eval $(docker-machine env swarm-master)
+docker stop swarm-agent
+docker rm swarm-agent
+
+eval $(docker-machine env swarm-keystore)
+
 docker-machine create \
   -d virtualbox \
   --swarm \
