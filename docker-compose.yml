@@ -1,0 +1,22 @@
+version: '2'
+services:
+  web:
+    image: dockercloud/hello-world
+    ports:
+      - 8080
+
+  lb:
+    image: dockercloud/haproxy
+    
+    # https://www.bountysource.com/issues/34844910-sample-for-multihost-haproxy-does-not-work
+    # To be able to load balance between several hosts
+    environment:
+      - DOCKER_TLS_VERIFY
+      - DOCKER_HOST
+      - DOCKER_CERT_PATH
+    ports:
+      - 9000:80
+    links:
+      - web
+    volumes:
+      - $DOCKER_CERT_PATH:$DOCKER_CERT_PATH
